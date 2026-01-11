@@ -3,7 +3,10 @@ Test script to validate data processing logic without database
 """
 import pandas as pd
 import sys
-sys.path.insert(0, '/home/runner/work/Zip-Listen-Analytics/Zip-Listen-Analytics/backend')
+import os
+
+# Add parent directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from app.utils.regions import STATE_TO_REGION
 

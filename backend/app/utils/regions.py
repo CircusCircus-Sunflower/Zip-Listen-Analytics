@@ -13,7 +13,7 @@ STATE_TO_REGION = {
     "DE": "Southeast", "FL": "Southeast", "GA": "Southeast", "MD": "Southeast",
     "NC": "Southeast", "SC": "Southeast", "VA": "Southeast", "WV": "Southeast",
     "AL": "Southeast", "KY": "Southeast", "MS": "Southeast", "TN": "Southeast",
-    "AR": "Southeast", "LA": "Southeast",
+    "AR": "Southeast", "LA": "Southeast", "TX": "Southeast",
     
     # Midwest
     "IL": "Midwest", "IN": "Midwest", "MI": "Midwest", "OH": "Midwest",
