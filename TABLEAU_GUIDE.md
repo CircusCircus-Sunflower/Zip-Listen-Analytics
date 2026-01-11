@@ -76,6 +76,7 @@ CASE [State]
   WHEN "TN" THEN "Southeast"
   WHEN "AR" THEN "Southeast"
   WHEN "LA" THEN "Southeast"
+  WHEN "TX" THEN "Southeast"
   
   WHEN "IL" THEN "Midwest"
   WHEN "IN" THEN "Midwest"
