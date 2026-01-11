@@ -128,9 +128,16 @@ def load_all_csvs(data_dir='data', state_column='state'):
 
 
 if __name__ == '__main__':
-    # Example usage
+    # Example usage - requires a 'data' directory with CSV files
+    import sys
+    
+    if len(sys.argv) > 1:
+        data_dir = sys.argv[1]
+    else:
+        data_dir = 'data'
+    
     try:
-        dataframes = load_all_csvs()
+        dataframes = load_all_csvs(data_dir)
         
         print("\nSummary:")
         print(f"Loaded {len(dataframes)} datasets")
@@ -144,4 +151,5 @@ if __name__ == '__main__':
                 
     except FileNotFoundError as e:
         print(f"Error: {e}")
-        print("\nTo use this script, create a 'data' directory with CSV files containing a 'state' column.")
+        print(f"\nTo use this script, create a '{data_dir}' directory with CSV files containing a 'state' column.")
+        print(f"Usage: python data_loader.py [data_directory]")
