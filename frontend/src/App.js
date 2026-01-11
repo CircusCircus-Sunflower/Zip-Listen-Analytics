@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
 import Plot from 'react-plotly.js';
 import './App.css';
@@ -40,7 +40,9 @@ function App() {
     }
   };
 
-  const prepareGenresChart = () => {
+  const genresChart = useMemo(() => {
+    if (genresData.length === 0) return null;
+    
     const regions = [...new Set(genresData.map(d => d.region))];
     const genres = [...new Set(genresData.map(d => d.genre))];
 
@@ -63,9 +65,11 @@ function App() {
         yaxis: { title: 'Stream Count' }
       }
     };
-  };
+  }, [genresData]);
 
-  const prepareSubscribersChart = () => {
+  const subscribersChart = useMemo(() => {
+    if (subscribersData.length === 0) return null;
+    
     const regions = [...new Set(subscribersData.map(d => d.region))];
     
     const paidData = regions.map(region => {
@@ -102,9 +106,11 @@ function App() {
         yaxis: { title: 'User Count' }
       }
     };
-  };
+  }, [subscribersData]);
 
-  const prepareTopArtistsChart = () => {
+  const topArtistsChart = useMemo(() => {
+    if (topArtistsData.length === 0) return null;
+    
     return {
       data: [{
         x: topArtistsData.map(a => a.artist),
@@ -118,9 +124,11 @@ function App() {
         yaxis: { title: 'Stream Count' }
       }
     };
-  };
+  }, [topArtistsData]);
 
-  const prepareRisingArtistsChart = () => {
+  const risingArtistsChart = useMemo(() => {
+    if (risingArtistsData.length === 0) return null;
+    
     return {
       data: [{
         x: risingArtistsData.map(a => a.artist),
@@ -136,7 +144,7 @@ function App() {
         yaxis: { title: 'Growth Rate (%)' }
       }
     };
-  };
+  }, [risingArtistsData]);
 
   if (loading) {
     return (
@@ -172,10 +180,10 @@ function App() {
       
       <div className="dashboard">
         <div className="chart-container">
-          {genresData.length > 0 && (
+          {genresChart && (
             <Plot
-              data={prepareGenresChart().data}
-              layout={prepareGenresChart().layout}
+              data={genresChart.data}
+              layout={genresChart.layout}
               config={{ responsive: true }}
               style={{ width: '100%', height: '100%' }}
             />
@@ -183,10 +191,10 @@ function App() {
         </div>
 
         <div className="chart-container">
-          {subscribersData.length > 0 && (
+          {subscribersChart && (
             <Plot
-              data={prepareSubscribersChart().data}
-              layout={prepareSubscribersChart().layout}
+              data={subscribersChart.data}
+              layout={subscribersChart.layout}
               config={{ responsive: true }}
               style={{ width: '100%', height: '100%' }}
             />
@@ -194,10 +202,10 @@ function App() {
         </div>
 
         <div className="chart-container">
-          {topArtistsData.length > 0 && (
+          {topArtistsChart && (
             <Plot
-              data={prepareTopArtistsChart().data}
-              layout={prepareTopArtistsChart().layout}
+              data={topArtistsChart.data}
+              layout={topArtistsChart.layout}
               config={{ responsive: true }}
               style={{ width: '100%', height: '100%' }}
             />
@@ -205,10 +213,10 @@ function App() {
         </div>
 
         <div className="chart-container">
-          {risingArtistsData.length > 0 && (
+          {risingArtistsChart && (
             <Plot
-              data={prepareRisingArtistsChart().data}
-              layout={prepareRisingArtistsChart().layout}
+              data={risingArtistsChart.data}
+              layout={risingArtistsChart.layout}
               config={{ responsive: true }}
               style={{ width: '100%', height: '100%' }}
             />
