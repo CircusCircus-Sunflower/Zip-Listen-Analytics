@@ -129,7 +129,9 @@ def generate_regional_report(listen_events):
     """Generate comprehensive regional report"""
     print("\n=== Regional Report ===")
     
-    from backend.app.utils.regions import STATE_TO_REGION
+    import sys
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from app.utils.regions import STATE_TO_REGION
     
     # Map states to regions
     listen_events['region'] = listen_events['state'].map(STATE_TO_REGION)
@@ -163,7 +165,9 @@ def export_for_tableau(listen_events, auth_events, status_change_events):
     """Export processed data for Tableau"""
     print("\n=== Exporting Data for Tableau ===")
     
-    from backend.app.utils.regions import STATE_TO_REGION
+    import sys
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from app.utils.regions import STATE_TO_REGION
     
     # Add region to all dataframes
     listen_events['region'] = listen_events['state'].map(STATE_TO_REGION)

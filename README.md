@@ -204,7 +204,7 @@ Get rising artists based on growth rate.
 ## 🗺️ US Region Mapping
 
 - **Northeast**: CT, ME, MA, NH, RI, VT, NJ, NY, PA
-- **Southeast**: DE, FL, GA, MD, NC, SC, VA, WV, AL, KY, MS, TN, AR, LA
+- **Southeast**: DE, FL, GA, MD, NC, SC, VA, WV, AL, KY, MS, TN, AR, LA, TX
 - **Midwest**: IL, IN, MI, OH, WI, IA, KS, MN, MO, NE, ND, SD
 - **West**: AZ, CO, ID, MT, NV, NM, UT, WY, AK, CA, HI, OR, WA
 
