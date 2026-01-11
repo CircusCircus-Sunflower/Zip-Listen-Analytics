@@ -50,6 +50,9 @@ def add_region_column(df, state_column='state'):
     if state_column not in df.columns:
         raise ValueError(f"Column '{state_column}' not found in dataframe")
     
+    # Create a copy to avoid modifying the original dataframe
+    df = df.copy()
+    
     # Map states to regions
     df['region'] = df[state_column].map(STATE_TO_REGION)
     
