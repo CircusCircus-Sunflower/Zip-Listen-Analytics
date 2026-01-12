@@ -222,3 +222,5 @@ package-lock.json
 # Database
 postgres_data/
 *.sql.bak
+data/*.csv
+data/*.csv
