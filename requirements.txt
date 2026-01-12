@@ -4,4 +4,4 @@ fastapi
 uvicorn
 sqlalchemy
 plotly
-python-dotenv
+sqlalchemy
