@@ -224,3 +224,4 @@ postgres_data/
 *.sql.bak
 data/*.csv
 data/*.csv
+.DS_Store
