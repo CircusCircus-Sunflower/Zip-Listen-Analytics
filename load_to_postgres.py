@@ -8,7 +8,7 @@ from sqlalchemy import create_engine
 from data_loader import STATE_TO_REGION
 
 # Database connection - matches docker-compose.yml
-DATABASE_URL = "postgresql://zipuser:zippassword@localhost:5432/ziplistendb"
+DATABASE_URL = "postgresql://sunflower_user:zipmusic@xo.zipcode.rocks:9088/sunflower"
 
 
 def add_region(df, state_column="state"):
