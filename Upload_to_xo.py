@@ -6,7 +6,7 @@ import pandas as pd
 from sqlalchemy import create_engine
 
 # Local database (has genres)
-LOCAL_URL = "postgresql://zipuser:zippassword@localhost:5432/ziplistendb"
+LOCAL_URL = ""postgresql://sunflower_user:zipmusic@xo.zipcode.rocks:9088/sunflower""
 local_engine = create_engine(LOCAL_URL)
 
 # XO database (destination)
