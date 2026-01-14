@@ -225,4 +225,5 @@ postgres_data/
 data/*.csv
 data/*.csv
 data/*.csv
-.DS_Store
+.DS_Storedata/*.csv
+data/*.CSV
