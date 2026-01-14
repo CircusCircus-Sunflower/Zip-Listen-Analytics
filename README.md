@@ -100,7 +100,7 @@ A comprehensive music streaming analytics platform built with FastAPI, PostgreSQ
 
 4. **Set up environment variables**
    ```bash
-   export DATABASE_URL="postgresql://zipuser:zippassword@localhost:5432/ziplistendb"
+   export DATABASE_URL=""postgresql://sunflower_user:zipmusic@xo.zipcode.rocks:9088/sunflower""
    ```
 
 5. **Run the application**
