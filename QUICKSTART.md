@@ -248,7 +248,7 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
 # Start PostgreSQL separately or update DATABASE_URL
-export DATABASE_URL="postgresql://zipuser:zippassword@localhost:5432/ziplistendb"
+export DATABASE_URL=""postgresql://sunflower_user:zipmusic@xo.zipcode.rocks:9088/sunflower""
 
 # Run the server
 uvicorn app.main:app --reload
