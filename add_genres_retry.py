@@ -1,5 +1,5 @@
 """
-Add genres to listen_events
+Add genres to listen_events - WITH RETRY LOGIC
 Handles connection drops from XO server.
 """
 
