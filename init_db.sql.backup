@@ -1,7 +1,7 @@
 -- Sample data for Zip Listen Analytics
 
 -- Sample listen events
-INSERT INTO listen_events (artist, song, duration, userid, state, level, genre, timestamp) VALUES
+INSERT INTO listen_events (artist, song, duration, user_id, state, level, genre, timestamp) VALUES
 -- Pop music across regions
 ('Taylor Swift', 'Anti-Hero', 202.5, 'user001', 'NY', 'paid', 'Pop', NOW() - INTERVAL '1 day'),
 ('Taylor Swift', 'Lavender Haze', 207.3, 'user002', 'CA', 'free', 'Pop', NOW() - INTERVAL '2 days'),
@@ -64,7 +64,7 @@ INSERT INTO listen_events (artist, song, duration, userid, state, level, genre, 
 ('The Weeknd', 'Starboy', 230.0, 'user043', 'WA', 'paid', 'Pop', NOW() - INTERVAL '3 days');
 
 -- Sample auth events
-INSERT INTO auth_events (success, userid, state, timestamp) VALUES
+INSERT INTO auth_events (success, user_id, state, timestamp) VALUES
 (true, 'user001', 'NY', NOW() - INTERVAL '1 day'),
 (true, 'user002', 'CA', NOW() - INTERVAL '2 days'),
 (true, 'user003', 'TX', NOW() - INTERVAL '1 day'),
@@ -79,7 +79,7 @@ INSERT INTO auth_events (success, userid, state, timestamp) VALUES
 (true, 'user010', 'PA', NOW() - INTERVAL '1 day');
 
 -- Sample status change events (subscription level changes)
-INSERT INTO status_change_events (level, userid, state, timestamp) VALUES
+INSERT INTO status_change_events (level, user_id, state, timestamp) VALUES
 -- Paid users
 ('paid', 'user001', 'NY', NOW() - INTERVAL '30 days'),
 ('paid', 'user003', 'TX', NOW() - INTERVAL '45 days'),
