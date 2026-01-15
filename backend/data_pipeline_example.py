@@ -20,7 +20,7 @@ from datetime import datetime, timedelta
 # Database connection
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    ""postgresql://sunflower_user:zipmusic@xo.zipcode.rocks:9088/sunflower""
+    "postgresql://sunflower_user:zipmusic@xo.zipcode.rocks:9088/sunflower"
 )
 
 # Create engine

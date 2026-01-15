@@ -27,26 +27,26 @@ def get_genres_by_region(
     """
     # Query all listen events
     query = db.query(
-        ListenEvent.state,
-        ListenEvent.genre,
-        func.count(ListenEvent.id).label('stream_count')
-    ).group_by(ListenEvent.state, ListenEvent.genre)
-    
+    summary_genre_by_region.region_name,
+    summary_genre_by_region.genre,
+    summary_genre_by_region.listen_count
+).group_by(ListenEvent.state, ListenEvent.genre)
+
     results = query.all()
-    
+
     # Convert to dataframe for easier processing
     df = pd.DataFrame(results, columns=['state', 'genre', 'stream_count'])
-    
+
     # Map states to regions
     df['region'] = df['state'].map(STATE_TO_REGION)
-    
+
     # Filter by region if specified
     if region:
         df = df[df['region'] == region]
-    
+
     # Group by region and genre
     region_genre = df.groupby(['region', 'genre'])['stream_count'].sum().reset_index()
-    
+
     # Convert to response format
     response = []
     for _, row in region_genre.iterrows():
@@ -55,7 +55,7 @@ def get_genres_by_region(
             genre=row['genre'],
             stream_count=int(row['stream_count'])
         ))
-    
+
     return response
 
 
@@ -69,26 +69,24 @@ def get_subscribers_by_region(
     """
     # Query unique users by state and level
     query = db.query(
-        StatusChangeEvent.state,
-        StatusChangeEvent.level,
-        func.count(func.distinct(StatusChangeEvent.userId)).label('user_count')
+    summary_retention_cohort.cohort_month,
     ).group_by(StatusChangeEvent.state, StatusChangeEvent.level)
-    
+
     results = query.all()
-    
+
     # Convert to dataframe
     df = pd.DataFrame(results, columns=['state', 'level', 'user_count'])
-    
+
     # Map states to regions
     df['region'] = df['state'].map(STATE_TO_REGION)
-    
+
     # Filter by region if specified
     if region:
         df = df[df['region'] == region]
-    
+
     # Group by region and level
     region_level = df.groupby(['region', 'level'])['user_count'].sum().reset_index()
-    
+
     # Convert to response format
     response = []
     for _, row in region_level.iterrows():
@@ -97,7 +95,7 @@ def get_subscribers_by_region(
             level=row['level'],
             user_count=int(row['user_count'])
         ))
-    
+
     return response
 
 
@@ -171,16 +169,17 @@ def get_rising_artists(
     # Merge dataframes
     df = recent_df.merge(previous_df, on='artist', how='left')
     df['previous_streams'] = df['previous_streams'].fillna(0)
+    df = df[df['previous_streams'] > 0]
     
     # Calculate growth rate (avoid division by zero)
     df['growth_rate'] = df.apply(
-        lambda row: (
-            ((row['current_streams'] - row['previous_streams']) / row['previous_streams'] * 100)
-            if row['previous_streams'] > 0
-            else (100.0 if row['current_streams'] > 0 else 0.0)
-        ),
-        axis=1
-    )
+    lambda row: (
+        ((row['current_streams'] - row['previous_streams']) / row['previous_streams'] * 100)
+        if row['previous_streams'] > 0
+        else 0.0  # Remove the nested conditional
+    ),
+    axis=1
+)
     
     # Sort by growth rate and limit
     df = df.sort_values('growth_rate', ascending=False).head(limit)
