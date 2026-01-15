@@ -7,7 +7,30 @@ load_dotenv()
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql://zipuser:zippassword@db:5432/ziplistendb"
+    "postgresql://sunflower_user:zipmusic@xo.zipcode.rocks:9088/sunflower",
+)
+
+engine = create_engine(DATABASE_URL)
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+DATABASE_URL = os.getenv(
+    "DATABASE_URL", "postgresql://zipuser:zippassword@db:5432/ziplistendb"
 )
 
 engine = create_engine(DATABASE_URL)
