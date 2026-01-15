@@ -227,3 +227,5 @@ data/*.csv
 data/*.csv
 .DS_Storedata/*.csv
 data/*.CSV
+data/*.csv
+*.csv
