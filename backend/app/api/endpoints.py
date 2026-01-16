@@ -4,14 +4,34 @@ from sqlalchemy import func
 from typing import List, Optional
 import pandas as pd
 
+# Utility/database imports
 from ..db.database import get_db
-from ..models.models import ListenEvent, StatusChangeEvent
+
+# Import ALL relevant models (event + summary tables)
+from ..models.models import (
+    ListenEvent,
+    StatusChangeEvent,
+    # Add all summary models below!
+    SummaryGenreByRegion,
+    SummaryRetentionCohort,
+    SummaryArtistPopularityByGeo,
+    SummaryUserEngagementByContent,
+    SummaryCityGrowthTrends,
+    SummaryPlatformUsage
+)
+
+# Import ALL response schemas
 from ..schemas.schemas import (
     GenreByRegionResponse,
     SubscriberByRegionResponse,
     TopArtistResponse,
-    RisingArtistResponse
+    RisingArtistResponse,
+    CityGrowthTrendsResponse,
+    PlatformUsageResponse,
+    DashboardSummaryResponse
 )
+
+# (If you still use state-region mapping)
 from ..utils.regions import STATE_TO_REGION
 
 router = APIRouter()
