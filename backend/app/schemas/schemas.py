@@ -39,3 +39,9 @@ class PlatformUsageResponse(BaseModel):
     region_name: str
     active_users: int
     play_count: int
+
+class DashboardSummaryResponse(BaseModel):
+    total_active_users: int
+    total_play_count: int
+    top_growth_city: Optional[str]
+    top_growth_percent: Optional[float]

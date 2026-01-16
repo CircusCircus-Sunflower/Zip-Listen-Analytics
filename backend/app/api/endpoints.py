@@ -134,3 +134,21 @@ def get_platform_usage(
             play_count=row.play_count
         ) for row in query.all()
     ]
+
+@router.get("/dashboard/summary")
+def dashboard_summary(db: Session = Depends(get_db)):
+    # Total users from platform usage
+    total_users = db.query(func.sum(SummaryPlatformUsage.active_users)).scalar() or 0
+    total_plays = db.query(func.sum(SummaryPlatformUsage.play_count)).scalar() or 0
+
+    # Latest city with max growth
+    city_growth = db.query(SummaryCityGrowthTrends).order_by(
+        SummaryCityGrowthTrends.percent_growth_wow.desc()
+    ).first()
+
+    return DashboardSummaryResponse(
+        total_active_users=total_users,
+        total_play_count=total_plays,
+        top_growth_city=city_growth.city if city_growth else None,
+        top_growth_percent=city_growth.percent_growth_wow if city_growth else None,
+    )
