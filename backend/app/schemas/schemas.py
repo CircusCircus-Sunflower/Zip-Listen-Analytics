@@ -57,8 +57,9 @@ class CityGrowthTrendsResponse(BaseModel):
 
 # Platform usage
 class PlatformUsageResponse(BaseModel):
-    platform: str
+    device_type: str
     region_name: str
+    page: str
     active_users: int
     play_count: int
     last_updated: datetime

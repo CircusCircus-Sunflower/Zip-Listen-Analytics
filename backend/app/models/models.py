@@ -100,7 +100,7 @@ class SummaryCityGrowthTrends(Base):
 class SummaryPlatformUsage(Base):
     __tablename__ = "summary_platform_usage"
 
-    platform = Column(String, primary_key=True)      # web, mobile, desktop
+    device_type = Column(String, primary_key=True)      # web, mobile, desktop
     region_name = Column(String, primary_key=True)   # US regions
     active_users = Column(Integer)
     play_count = Column(Integer)

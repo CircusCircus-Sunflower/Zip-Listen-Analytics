@@ -11,8 +11,8 @@ from ..db.database import get_db
 # Import ALL relevant models (event + summary tables)
 from ..models.models import (
     ListenEvent,
+    AuthEvent,
     StatusChangeEvent,
-    # Add all summary models below!
     SummaryGenreByRegion,
     SummaryRetentionCohort,
     SummarySubscribersByRegion,
@@ -174,7 +174,7 @@ def get_platform_usage(
         query = query.filter(SummaryPlatformUsage.platform == platform)
     return [
         PlatformUsageResponse(
-            platform=row.platform,
+            device_type=row.device_type,
             region_name=row.region_name,
             active_users=row.active_users,
             play_count=row.play_count
@@ -188,10 +188,15 @@ def dashboard_summary(db: Session = Depends(get_db)):
     total_plays = db.query(func.sum(SummaryPlatformUsage.play_count)).scalar() or 0
 
     # Latest city with max growth
-    city_growth = db.query(SummaryCityGrowthTrends).order_by(
-        SummaryCityGrowthTrends.percent_growth_wow.desc()
-    ).first()
-
+    city_growth = (
+    db.query(SummaryCityGrowthTrends)
+    .filter(SummaryCityGrowthTrends.percent_growth_wow != None)
+    .order_by(
+        SummaryCityGrowthTrends.date.desc(),
+        SummaryCityGrowthTrends.percent_growth_wow.desc(),
+    )
+    .first()
+)
     return DashboardSummaryResponse(
         total_active_users=total_users,
         total_play_count=total_plays,
