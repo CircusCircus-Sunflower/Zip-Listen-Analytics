@@ -38,6 +38,8 @@ class UserEngagementByContentResponse(BaseModel):
 class RetentionCohortResponse(BaseModel):
     cohort_month: str
     period: int
+    state: str
+    retained_users: int
     churned_users: int
     upgrades: int
     downgrades: int

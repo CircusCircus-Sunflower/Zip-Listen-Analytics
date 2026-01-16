@@ -79,6 +79,8 @@ class SummaryRetentionCohort(Base):
     
     cohort_month = Column(String, primary_key=True)  # e.g., "2024-01"
     period = Column(Integer, primary_key=True)  # months since cohort start
+    state = Column(String, primary_key=True)
+    retained_users = Column(Integer)
     churned_users = Column(Integer)
     upgrades = Column(Integer)
     downgrades = Column(Integer)

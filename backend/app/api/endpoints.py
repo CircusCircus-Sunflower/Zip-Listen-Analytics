@@ -173,3 +173,27 @@ def dashboard_summary(db: Session = Depends(get_db)):
         top_growth_city=city_growth.city if city_growth else None,
         top_growth_percent=city_growth.percent_growth_wow if city_growth else None,
     )
+
+@router.get("/retention", response_model=List[RetentionCohortResponse])
+def get_retention_data(
+    cohort_month: Optional[str] = Query(None, description="Cohort month (YYYY-MM)"),
+    state: Optional[str] = Query(None, description="US state abbreviation (e.g., 'NY', 'TX')"),
+    db: Session = Depends(get_db)
+):
+    query = db.query(SummaryRetentionCohort)
+    if cohort_month:
+        query = query.filter(SummaryRetentionCohort.cohort_month == cohort_month)
+    if state:
+        query = query.filter(SummaryRetentionCohort.state == state)
+    return [
+        RetentionCohortResponse(
+            cohort_month=row.cohort_month,
+            period=row.period,
+            state=row.state,
+            retained_users=row.retained_users,
+            churned_users=row.churned_users,
+            upgrades=row.upgrades,
+            downgrades=row.downgrades,
+            last_updated=row.last_updated
+        ) for row in query.all()
+    ]
