@@ -25,3 +25,17 @@ class RisingArtistResponse(BaseModel):
     growth_rate: float
     current_streams: int
     previous_streams: int
+
+class CityGrowthTrendsResponse(BaseModel):
+    city: str
+    state: str
+    date: date
+    new_users: int
+    percent_growth_wow: int
+    total_streaming_hours: int
+
+class PlatformUsageResponse(BaseModel):
+    platform: str
+    region_name: str
+    active_users: int
+    play_count: int

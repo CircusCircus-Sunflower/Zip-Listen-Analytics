@@ -117,3 +117,20 @@ def get_city_growth(
             total_streaming_hours=row.total_streaming_hours
         ) for row in query.all()
     ]
+
+@router.get("/platforms/usage", response_model=List[PlatformUsageResponse])
+def get_platform_usage(
+    platform: Optional[str] = Query(None, description="Filter by platform"),
+    db: Session = Depends(get_db)
+):
+    query = db.query(SummaryPlatformUsage)
+    if platform:
+        query = query.filter(SummaryPlatformUsage.platform == platform)
+    return [
+        PlatformUsageResponse(
+            platform=row.platform,
+            region_name=row.region_name,
+            active_users=row.active_users,
+            play_count=row.play_count
+        ) for row in query.all()
+    ]
