@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List, Optional
+from sqlalchemy import and_
 import pandas as pd
 
 # Utility/database imports
@@ -85,39 +86,63 @@ def get_subscribers_by_region(
     ]
 
 
-@router.get("/artists/top", response_model=List[TopArtistResponse])
-def get_top_artists(
-    region: Optional[str] = Query(None),
-    db: Session = Depends(get_db)
+@router.get("/artists/top", response_model=list[ArtistPopularityByGeoResponse])
+def get_top_artist_per_state(
+    db: Session = Depends(get_db),
 ):
-    query = db.query(SummaryArtistPopularityByGeo)
-    if region:
-        query = query.filter(SummaryArtistPopularityByGeo.region_name == region)
-    query = query.order_by(SummaryArtistPopularityByGeo.play_count.desc())
+    # Find the MAX play_count per state (subquery)
+    subq = (
+        db.query(
+            SummaryArtistPopularityByGeo.state,
+            func.max(SummaryArtistPopularityByGeo.play_count).label("max_play_count")
+        )
+        .group_by(SummaryArtistPopularityByGeo.state)
+        .subquery()
+    )
+
+    # Join to main table to get the top artist per state
+    results = (
+        db.query(SummaryArtistPopularityByGeo)
+        .join(
+            subq,
+            and_(
+                SummaryArtistPopularityByGeo.state == subq.c.state,
+                SummaryArtistPopularityByGeo.play_count == subq.c.max_play_count
+            )
+        )
+        .all()
+    )
+
     return [
-        TopArtistResponse(
+        ArtistPopularityByGeoResponse(
+            state=row.state,
             artist=row.artist,
-            region=row.region_name,
             play_count=row.play_count,
-            unique_listeners=row.unique_listeners
-        ) for row in query.all()
+            unique_listeners=row.unique_listeners,
+            last_updated=row.last_updated
+        )
+        for row in results
     ]
 
 
-@router.get("/artists/rising", response_model=List[RisingArtistResponse])
+@router.get("/artists/rising", response_model=List[UserEngagementByContentResponse])
 def get_rising_artists(
     db: Session = Depends(get_db)
 ):
     query = db.query(SummaryUserEngagementByContent)
-    # Add additional sorting or filtering as needed for "rising" logic
+    # Sort by repeat_plays descending as "rising" proxy
     results = query.order_by(SummaryUserEngagementByContent.repeat_plays.desc()).all()
     return [
-        RisingArtistResponse(
+        UserEngagementByContentResponse(
             artist=row.artist,
-            song=row.song,
+            genre=row.genre,
+            avg_session_length_after_play=row.avg_session_length_after_play,
             repeat_plays=row.repeat_plays,
-            returning_user_pct=row.returning_user_pct
-        ) for row in results
+            unique_listeners=row.unique_listeners,
+            returning_user_pct=row.returning_user_pct,
+            last_updated=row.last_updated
+        )
+        for row in results
     ]
 
 @router.get("/cities/growth", response_model=List[CityGrowthTrendsResponse])

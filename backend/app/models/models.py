@@ -57,7 +57,7 @@ class SummarySubscribersByRegion(Base):
 class SummaryArtistPopularityByGeo(Base):
     __tablename__ = "summary_artist_popularity_by_geo"
     
-    region_name = Column(String, primary_key=True)
+    state = Column(String, primary_key=True)
     artist = Column(String, primary_key=True)
     play_count = Column(Integer)
     unique_listeners = Column(Integer)

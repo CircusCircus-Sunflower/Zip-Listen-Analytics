@@ -18,7 +18,7 @@ class SubscribersByRegionResponse(BaseModel):
 
 # Artist popularity by geo
 class ArtistPopularityByGeoResponse(BaseModel):
-    region_name: str
+    state: str
     artist: str
     play_count: int
     unique_listeners: int
