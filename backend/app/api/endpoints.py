@@ -60,7 +60,7 @@ def get_genres_by_region(
         GenreByRegionResponse(
             region=row.region_name,
             genre=row.genre,
-            stream_count=row.listen_count
+            listen_count=row.listen_count
         ) for row in query.all()
     ]
 
