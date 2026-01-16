@@ -7,6 +7,7 @@ from .models.models import Base
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
+
 app = FastAPI(
     title="Zip Listen Analytics API",
     description="Music streaming analytics API for Zip Listen",
@@ -43,3 +44,8 @@ def read_root():
 @app.get("/health")
 def health_check():
     return {"status": "healthy"}
+# At the top with other imports
+from app.api import ai
+
+# Where routers are included (after app = FastAPI())
+app.include_router(ai.router)
