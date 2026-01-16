@@ -44,7 +44,7 @@ class SummaryGenreByRegion(Base):
     region_name = Column(String, primary_key=True)
     genre = Column(String, primary_key=True)
     listen_count = Column(Integer)
-    last_updated = Column(DateTime, default=datetime.utcnow)  
+    last_updated = Column(DateTime, default=datetime.utcnow)
 
 class SummaryArtistPopularityByGeo(Base):
     __tablename__ = "summary_artist_popularity_by_geo"
