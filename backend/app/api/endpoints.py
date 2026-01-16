@@ -98,3 +98,22 @@ def get_rising_artists(
             returning_user_pct=row.returning_user_pct
         ) for row in results
     ]
+
+@router.get("/cities/growth", response_model=List[CityGrowthTrendsResponse])
+def get_city_growth(
+    state: Optional[str] = Query(None, description="Filter by state"),
+    db: Session = Depends(get_db)
+):
+    query = db.query(SummaryCityGrowthTrends)
+    if state:
+        query = query.filter(SummaryCityGrowthTrends.state == state)
+    return [
+        CityGrowthTrendsResponse(
+            city=row.city,
+            state=row.state,
+            date=row.date,
+            new_users=row.new_users,
+            percent_growth_wow=row.percent_growth_wow,
+            total_streaming_hours=row.total_streaming_hours
+        ) for row in query.all()
+    ]
