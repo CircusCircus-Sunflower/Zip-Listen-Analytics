@@ -46,6 +46,14 @@ class SummaryGenreByRegion(Base):
     listen_count = Column(Integer)
     last_updated = Column(DateTime, default=datetime.utcnow)
 
+class SummarySubscribersByRegion(Base):
+    __tablename__ = "summary_subscribers_by_region"
+
+    region_name = Column(String, primary_key=True)
+    level = Column(String, primary_key=True)  # e.g., "paid", "free"
+    subscriber_count = Column(Integer)
+    last_updated = Column(DateTime)
+
 class SummaryArtistPopularityByGeo(Base):
     __tablename__ = "summary_artist_popularity_by_geo"
     
@@ -90,11 +98,9 @@ class SummaryCityGrowthTrends(Base):
 class SummaryPlatformUsage(Base):
     __tablename__ = "summary_platform_usage"
 
-    platform = Column(String, primary_key = True) # web, mobile, desktop
-    region_name = Column(String, primary_key = True)
-    page = Column(String, primary_key = True)
+    platform = Column(String, primary_key=True)      # web, mobile, desktop
+    region_name = Column(String, primary_key=True)   # US regions
     active_users = Column(Integer)
     play_count = Column(Integer)
     last_updated = Column(DateTime, default=datetime.utcnow)
-
 

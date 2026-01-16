@@ -14,6 +14,7 @@ from ..models.models import (
     # Add all summary models below!
     SummaryGenreByRegion,
     SummaryRetentionCohort,
+    SummarySubscribersByRegion,
     SummaryArtistPopularityByGeo,
     SummaryUserEngagementByContent,
     SummaryCityGrowthTrends,
@@ -23,15 +24,14 @@ from ..models.models import (
 # Import ALL response schemas
 from ..schemas.schemas import (
     GenreByRegionResponse,
-    SubscriberByRegionResponse,
-    TopArtistResponse,
-    RisingArtistResponse,
+    SubscribersByRegionResponse,
+    ArtistPopularityByGeoResponse,
+    UserEngagementByContentResponse,
+    RetentionCohortResponse,                # <-- If you keep retention endpoints
     CityGrowthTrendsResponse,
     PlatformUsageResponse,
     DashboardSummaryResponse
 )
-
-# (If you still use state-region mapping)
 from ..utils.regions import STATE_TO_REGION
 
 router = APIRouter()
@@ -64,27 +64,28 @@ def get_genres_by_region(
     ]
 
 
-@router.get("/subscribers/by-region", response_model=List[SubscriberByRegionResponse])
+@router.get("/subscribers/by-region", response_model=List[SubscribersByRegionResponse])
 def get_subscribers_by_region(
-    region: Optional[str] = Query(None),
+    region_name: Optional[str] = Query(None),
+    level: Optional[str] = Query(None),  # allow optional filter by paid/free
     db: Session = Depends(get_db)
 ):
-    query = db.query(SummaryRetentionCohort)
-    if region:
-        query = query.filter(SummaryRetentionCohort.region_name == region)  # If your table has region_name!
-    # Adjust fields according to your table!
+    query = db.query(SummarySubscribersByRegion)
+    if region_name:
+        query = query.filter(SummarySubscribersByRegion.region_name == region_name)
+    if level:
+        query = query.filter(SummarySubscribersByRegion.level == level)
     return [
-        SubscriberByRegionResponse(
-            cohort_month=row.cohort_month,
-            retained_users=row.retained_users,
-            churned_users=row.churned_users,
-            upgrades=row.upgrades,
-            downgrades=row.downgrades
+        SubscribersByRegionResponse(
+            region_name=row.region_name,
+            level=row.level,
+            subscriber_count=row.subscriber_count,
+            last_updated=row.last_updated
         ) for row in query.all()
     ]
 
 
-@router.get("/artists/top", response_model=List[TopArtistsResponse])
+@router.get("/artists/top", response_model=List[TopArtistResponse])
 def get_top_artists(
     region: Optional[str] = Query(None),
     db: Session = Depends(get_db)
@@ -94,7 +95,7 @@ def get_top_artists(
         query = query.filter(SummaryArtistPopularityByGeo.region_name == region)
     query = query.order_by(SummaryArtistPopularityByGeo.play_count.desc())
     return [
-        TopArtistsResponse(
+        TopArtistResponse(
             artist=row.artist,
             region=row.region_name,
             play_count=row.play_count,
