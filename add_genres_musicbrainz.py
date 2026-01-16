@@ -9,7 +9,7 @@ import requests
 from sqlalchemy import create_engine, text
 
 # Database setup
-DATABASE_URL = "postgresql://zipuser:zippassword@localhost:5432/ziplistendb"
+DATABASE_URL = ""postgresql://sunflower_user:zipmusic@xo.zipcode.rocks:9088/sunflower""
 engine = create_engine(DATABASE_URL)
 
 # MusicBrainz requires a User-Agent header
