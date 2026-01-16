@@ -1,0 +1,258 @@
+/*JN* Dashboard.css - Styling for Zip Listen Analytics Dashboard */
+
+/* Main Dashboard Container */
+.dashboard {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #efdc79 0%, #17d3b4 100%);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
+/* Header Styles */
+.dashboard-header {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 24px 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-content h1 {
+  margin: 0;
+  font-size: 32px;
+  color: #2c3e50;
+  font-weight: 700;
+}
+
+.header-content .subtitle {
+  margin: 4px 0 0 0;
+  font-size: 14px;
+  color: #6c757d;
+}
+
+.header-actions .refresh-btn {
+  padding: 10px 20px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.header-actions .refresh-btn:hover {
+  background: #5568d3;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+/* Navigation Tabs */
+.dashboard-nav {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 0 32px;
+  display: flex;
+  gap: 8px;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.nav-tab {
+  padding: 12px 24px;
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #6c757d;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  top: 2px;
+}
+
+.nav-tab:hover {
+  color: #667eea;
+  background: rgba(102, 126, 234, 0.05);
+}
+
+.nav-tab.active {
+  color: #667eea;
+  border-bottom-color: #667eea;
+  background: rgba(102, 126, 234, 0.05);
+}
+
+/* Main Content Area */
+.dashboard-content {
+  padding: 32px;
+  min-height: calc(100vh - 200px);
+}
+
+/* Grid Layouts */
+.overview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+.single-chart-view {
+  display: flex;
+  justify-content: center;
+}
+
+.artists-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 24px;
+}
+
+/* Chart Cards */
+.chart-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  transition: all 0.3s ease;
+}
+
+.chart-card:hover {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  transform: translateY(-4px);
+}
+
+.chart-card.full-width {
+  max-width: 1200px;
+  width: 100%;
+}
+
+/* Placeholder for upcoming components */
+.chart-card.placeholder {
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border: 2px dashed #667eea;
+}
+
+.placeholder-content {
+  text-align: center;
+  padding: 60px 20px;
+  color: #495057;
+}
+
+.placeholder-content h3 {
+  margin: 0 0 12px 0;
+  font-size: 24px;
+  color: #667eea;
+}
+
+.placeholder-content p {
+  margin: 8px 0;
+  font-size: 16px;
+  color: #6c757d;
+}
+
+/* Footer */
+.dashboard-footer {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 20px 32px;
+  text-align: center;
+  border-top: 1px solid #e9ecef;
+  margin-top: 32px;
+}
+
+.dashboard-footer p {
+  margin: 4px 0;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+/* Loading Spinner */
+.spinner {
+  display: inline-block;
+  padding: 20px;
+  font-size: 16px;
+  color: #667eea;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Error Message Styling */
+.error-message {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.error-message button {
+  transition: all 0.3s ease;
+}
+
+.error-message button:hover {
+  background: #0056b3;
+  transform: scale(1.05);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .overview-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+  
+  .dashboard-nav {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-content {
+    padding: 16px;
+  }
+  
+  .chart-card {
+    padding: 16px;
+  }
+  
+  .header-content h1 {
+    font-size: 24px;
+  }
+  
+  .nav-tab {
+    font-size: 14px;
+    padding: 10px 16px;
+  }
+  
+  .artists-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .dashboard-header,
+  .dashboard-nav,
+  .dashboard-footer {
+    display: none;
+  }
+  
+  .chart-card {
+    break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #dee2e6;
+  }
+}
