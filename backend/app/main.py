@@ -9,7 +9,7 @@ Base.metadata.create_all(bind=engine)
 
 
 app = FastAPI(
-    title="Zip Listen Analytics API",
+    title="Sunflower Analytics API",
     description="Music streaming analytics API for Zip Listen",
     version="1.0.0"
 )
