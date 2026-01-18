@@ -71,7 +71,7 @@ def get_subscribers_by_region(
     query = db.query(
         StatusChangeEvent.state,
         StatusChangeEvent.level,
-        func.count(func.distinct(StatusChangeEvent.userId)).label('user_count')
+        func.count(func.distinct(StatusChangeEvent.user_id)).label('user_count')
     ).group_by(StatusChangeEvent.state, StatusChangeEvent.level)
     
     results = query.all()
