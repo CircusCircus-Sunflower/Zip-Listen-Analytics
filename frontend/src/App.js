@@ -150,7 +150,7 @@ function App() {
     return (
       <div className="App">
         <header className="App-header">
-          <h1>Zip Listen Analytics</h1>
+          <h1>🎵 Sunflower Analytics</h1>
         </header>
         <div className="loading">Loading data...</div>
       </div>
@@ -161,7 +161,7 @@ function App() {
     return (
       <div className="App">
         <header className="App-header">
-          <h1>Zip Listen Analytics</h1>
+          <h1>Sunflower Analytics</h1>
         </header>
         <div className="error">
           <p>Error loading data: {error}</p>
@@ -174,7 +174,7 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <h1>🎵 Zip Listen Analytics</h1>
+        <h1>🎵 Sunflower Analytics</h1>
         <p>Music Streaming Analytics Dashboard</p>
       </header>
       
