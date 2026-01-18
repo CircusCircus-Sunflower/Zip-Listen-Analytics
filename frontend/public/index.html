@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
@@ -14,4 +14,322 @@
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
   </body>
+</html> -->
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sunflower Analytics</title>
+    <style>
+      :root {
+        --purple: #7c3aed;
+        --purple-2: #6d28d9;
+        --text: #111827;
+        --muted: #6b7280;
+        --bg: #ffffff;
+        --card: rgba(255, 255, 255, 0.75);
+        --border: rgba(124, 58, 237, 0.35);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+        color: var(--text);
+        background: radial-gradient(1200px 600px at 50% 15%, #f3e8ff 0%, #ffffff 55%, #ffffff 100%);
+        display: grid;
+        place-items: center;
+        padding: 24px;
+      }
+
+      .page {
+        width: min(980px, 95vw);
+        height: min(760px, 88vh);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.7));
+        border: 2px solid rgba(17, 24, 39, 0.04);
+        border-radius: 28px;
+        box-shadow:
+          0 20px 60px rgba(17, 24, 39, 0.10),
+          0 2px 10px rgba(17, 24, 39, 0.06);
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* subtle texture dots */
+      .page::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(rgba(17, 24, 39, 0.05) 1px, transparent 1px);
+        background-size: 18px 18px;
+        opacity: 0.25;
+        pointer-events: none;
+      }
+
+      .content {
+        position: relative;
+        height: 100%;
+        padding: 56px 26px 28px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        gap: 22px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(30px, 4vw, 52px);
+        font-weight: 750;
+        letter-spacing: 0.5px;
+        color: rgba(124, 58, 237, 0.75);
+        text-align: center;
+      }
+
+      /* Sol (sunflower mascot) */
+      .sol-wrap {
+        flex: 1;
+        display: grid;
+        place-items: center;
+        width: 100%;
+      }
+
+      .sol {
+        width: min(280px, 60vw);
+        aspect-ratio: 1 / 1;
+        position: relative;
+        filter: drop-shadow(0 18px 25px rgba(17, 24, 39, 0.14));
+      }
+
+      /* petals */
+      .petals {
+        position: absolute;
+        inset: 0;
+      }
+      .petals span {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 92px;
+        height: 34px;
+        background: linear-gradient(180deg, #fde047, #f59e0b);
+        border-radius: 999px;
+        transform-origin: left center;
+        transform: translateY(-50%) rotate(var(--r)) translateX(86px);
+        box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.08);
+      }
+
+      /* face disc */
+      .face {
+        position: absolute;
+        inset: 22%;
+        border-radius: 999px;
+        background: radial-gradient(circle at 35% 30%, #fde68a 0%, #f59e0b 55%, #d97706 100%);
+        box-shadow:
+          0 10px 24px rgba(17, 24, 39, 0.10),
+          inset 0 10px 18px rgba(255, 255, 255, 0.25);
+      }
+
+      /* eyes */
+      .eye {
+        position: absolute;
+        top: 42%;
+        width: 16%;
+        height: 16%;
+        background: #111827;
+        border-radius: 999px;
+        box-shadow: inset 0 -3px 0 rgba(255, 255, 255, 0.12);
+      }
+      .eye::after {
+        content: "";
+        position: absolute;
+        top: 22%;
+        left: 22%;
+        width: 32%;
+        height: 32%;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 999px;
+      }
+      .eye.left {
+        left: 30%;
+      }
+      .eye.right {
+        right: 30%;
+      }
+
+      /* smile */
+      .smile {
+        position: absolute;
+        left: 50%;
+        top: 58%;
+        width: 20%;
+        height: 12%;
+        transform: translateX(-50%);
+        border-bottom: 6px solid rgba(17, 24, 39, 0.8);
+        border-radius: 0 0 999px 999px;
+      }
+
+      /* headphones */
+      .headband {
+        position: absolute;
+        left: 50%;
+        top: 18%;
+        width: 76%;
+        height: 60%;
+        transform: translateX(-50%);
+        border: 10px solid rgba(17, 24, 39, 0.55);
+        border-bottom: 0;
+        border-radius: 999px 999px 0 0;
+      }
+
+      .ear {
+        position: absolute;
+        top: 42%;
+        width: 16%;
+        height: 28%;
+        background: linear-gradient(180deg, #e5e7eb, #9ca3af);
+        border-radius: 18px;
+        box-shadow: 0 8px 16px rgba(17, 24, 39, 0.12);
+      }
+      .ear.left {
+        left: 6%;
+      }
+      .ear.right {
+        right: 6%;
+      }
+
+      /* chat input area */
+      .chat {
+        width: min(720px, 92%);
+      }
+
+      .chat form {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        border-radius: 18px;
+        background: var(--card);
+        border: 2px solid var(--border);
+        box-shadow: 0 10px 24px rgba(17, 24, 39, 0.08);
+        backdrop-filter: blur(10px);
+      }
+
+      .chat input {
+        flex: 1;
+        border: 0;
+        outline: none;
+        background: transparent;
+        font-size: 16px;
+        padding: 12px 12px;
+        color: var(--text);
+      }
+
+      .chat input::placeholder {
+        color: rgba(17, 24, 39, 0.45);
+      }
+
+      .chat button {
+        border: 0;
+        cursor: pointer;
+        padding: 12px 18px;
+        border-radius: 14px;
+        font-weight: 750;
+        font-size: 16px;
+        color: white;
+        background: linear-gradient(180deg, var(--purple), var(--purple-2));
+        box-shadow: 0 10px 20px rgba(124, 58, 237, 0.25);
+      }
+
+      .chat button:active {
+        transform: translateY(1px);
+      }
+
+      .hint {
+        margin-top: 10px;
+        text-align: center;
+        font-size: 12px;
+        color: rgba(107, 114, 128, 0.9);
+      }
+    </style>
+  </head>
+
+  <body>
+    <main class="page" role="application" aria-label="Sunflower Analytics UI">
+      <div class="content">
+        <h1>Sunflower Analytics</h1>
+
+        <section class="sol-wrap" aria-label="Sol mascot">
+          <div class="sol" role="img" aria-label="Sol the sunflower wearing headphones">
+            <div class="petals" aria-hidden="true">
+              <!-- 18 petals -->
+              <span style="--r: 0deg"></span>
+              <span style="--r: 20deg"></span>
+              <span style="--r: 40deg"></span>
+              <span style="--r: 60deg"></span>
+              <span style="--r: 80deg"></span>
+              <span style="--r: 100deg"></span>
+              <span style="--r: 120deg"></span>
+              <span style="--r: 140deg"></span>
+              <span style="--r: 160deg"></span>
+              <span style="--r: 180deg"></span>
+              <span style="--r: 200deg"></span>
+              <span style="--r: 220deg"></span>
+              <span style="--r: 240deg"></span>
+              <span style="--r: 260deg"></span>
+              <span style="--r: 280deg"></span>
+              <span style="--r: 300deg"></span>
+              <span style="--r: 320deg"></span>
+              <span style="--r: 340deg"></span>
+            </div>
+
+            <div class="headband" aria-hidden="true"></div>
+            <div class="ear left" aria-hidden="true"></div>
+            <div class="ear right" aria-hidden="true"></div>
+
+            <div class="face" aria-hidden="true">
+              <div class="eye left"></div>
+              <div class="eye right"></div>
+              <div class="smile"></div>
+            </div>
+          </div>
+        </section>
+
+        <section class="chat" aria-label="Ask Sol">
+          <form id="solForm">
+            <input
+              id="solInput"
+              type="text"
+              placeholder="Hi I’m Sol… how can I help?"
+              autocomplete="off"
+            />
+            <button type="submit">Send</button>
+          </form>
+        </section>
+      </div>
+    </main>
+
+    <script>
+      // UI-only placeholder behavior
+      const form = document.getElementById("solForm");
+      const input = document.getElementById("solInput");
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const msg = input.value.trim();
+        if (!msg) return;
+
+        alert(`Sol received: ${msg}`);
+        input.value = "";
+        input.focus();
+      });
+    </script>
+  </body>
 </html>
+
