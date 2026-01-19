@@ -225,33 +225,4 @@ postgres_data/
 data/*.csv
 data/*.csv
 data/*.csv
-.DS_Storedata/*.csv
-data/*.CSV
-data/*.csv
-*.csv
-
-# AI Integration - API Keys
-.env
-backend/.env
-frontend/.env
-**/secrets.json
-**/api_keys.py
-
-# Environment variables and secrets
-.env
-backend/.env
-frontend/.env
-**/.env
-**/secrets.json
-**/api_keys.py
-**/credentials.json
-
-# Local environment files
-.env
-backend/.env
-frontend/.env
-.env.local
-
-.env
-backend/.env
-frontend/.env
+.DS_Store
