@@ -2,15 +2,36 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List, Optional
+from sqlalchemy import and_
 import pandas as pd
 
+# Utility/database imports
 from ..db.database import get_db
-from ..models.models import ListenEvent, StatusChangeEvent
+
+# Import ALL relevant models (event + summary tables)
+from ..models.models import (
+    ListenEvent,
+    AuthEvent,
+    StatusChangeEvent,
+    SummaryGenreByRegion,
+    SummaryRetentionCohort,
+    SummarySubscribersByRegion,
+    SummaryArtistPopularityByGeo,
+    SummaryUserEngagementByContent,
+    SummaryCityGrowthTrends,
+    SummaryPlatformUsage
+)
+
+# Import ALL response schemas
 from ..schemas.schemas import (
     GenreByRegionResponse,
-    SubscriberByRegionResponse,
-    TopArtistResponse,
-    RisingArtistResponse
+    SubscribersByRegionResponse,
+    ArtistPopularityByGeoResponse,
+    UserEngagementByContentResponse,
+    RetentionCohortResponse,                # <-- If you keep retention endpoints
+    CityGrowthTrendsResponse,
+    PlatformUsageResponse,
+    DashboardSummaryResponse
 )
 from ..utils.regions import STATE_TO_REGION
 
@@ -25,174 +46,184 @@ def get_genres_by_region(
     """
     Get genre distribution by US region (Northeast, Southeast, Midwest, West)
     """
-    # Query all listen events
-    query = db.query(
-        ListenEvent.state,
-        ListenEvent.genre,
-        func.count(ListenEvent.id).label('stream_count')
-    ).group_by(ListenEvent.state, ListenEvent.genre)
+    from ..models.models import SummaryGenreByRegion
     
-    results = query.all()
-    
-    # Convert to dataframe for easier processing
-    df = pd.DataFrame(results, columns=['state', 'genre', 'stream_count'])
-    
-    # Map states to regions
-    df['region'] = df['state'].map(STATE_TO_REGION)
+    # Query summary table
+    query = db.query(SummaryGenreByRegion)
     
     # Filter by region if specified
     if region:
-        df = df[df['region'] == region]
+        query = query.filter(SummaryGenreByRegion.region_name == region)
     
-    # Group by region and genre
-    region_genre = df.groupby(['region', 'genre'])['stream_count'].sum().reset_index()
-    
-    # Convert to response format
-    response = []
-    for _, row in region_genre.iterrows():
-        response.append(GenreByRegionResponse(
-            region=row['region'],
-            genre=row['genre'],
-            stream_count=int(row['stream_count'])
-        ))
-    
-    return response
+    # Return results directly
+    return [
+        GenreByRegionResponse(
+            region=row.region_name,
+            genre=row.genre,
+            listen_count=row.listen_count
+        ) for row in query.all()
+    ]
 
 
-@router.get("/subscribers/by-region", response_model=List[SubscriberByRegionResponse])
+@router.get("/subscribers/by-region", response_model=List[SubscribersByRegionResponse])
 def get_subscribers_by_region(
-    region: Optional[str] = Query(None, description="Filter by specific region"),
+    region_name: Optional[str] = Query(None),
+    level: Optional[str] = Query(None),  # allow optional filter by paid/free
     db: Session = Depends(get_db)
 ):
-    """
-    Get subscriber distribution (paid vs free) by US region
-    """
-    # Query unique users by state and level
-    query = db.query(
-        StatusChangeEvent.state,
-        StatusChangeEvent.level,
-        func.count(func.distinct(StatusChangeEvent.userId)).label('user_count')
-    ).group_by(StatusChangeEvent.state, StatusChangeEvent.level)
-    
-    results = query.all()
-    
-    # Convert to dataframe
-    df = pd.DataFrame(results, columns=['state', 'level', 'user_count'])
-    
-    # Map states to regions
-    df['region'] = df['state'].map(STATE_TO_REGION)
-    
-    # Filter by region if specified
-    if region:
-        df = df[df['region'] == region]
-    
-    # Group by region and level
-    region_level = df.groupby(['region', 'level'])['user_count'].sum().reset_index()
-    
-    # Convert to response format
-    response = []
-    for _, row in region_level.iterrows():
-        response.append(SubscriberByRegionResponse(
-            region=row['region'],
-            level=row['level'],
-            user_count=int(row['user_count'])
-        ))
-    
-    return response
+    query = db.query(SummarySubscribersByRegion)
+    if region_name:
+        query = query.filter(SummarySubscribersByRegion.region_name == region_name)
+    if level:
+        query = query.filter(SummarySubscribersByRegion.level == level)
+    return [
+        SubscribersByRegionResponse(
+            region_name=row.region_name,
+            level=row.level,
+            subscriber_count=row.subscriber_count,
+            last_updated=row.last_updated
+        ) for row in query.all()
+    ]
 
 
-@router.get("/artists/top", response_model=List[TopArtistResponse])
-def get_top_artists(
-    limit: int = Query(10, ge=1, le=100, description="Number of top artists to return"),
-    db: Session = Depends(get_db)
+@router.get("/artists/top", response_model=list[ArtistPopularityByGeoResponse])
+def get_top_artist_per_state(
+    db: Session = Depends(get_db),
 ):
-    """
-    Get top artists by total stream count
-    """
-    # Query artists with stream counts
-    query = db.query(
-        ListenEvent.artist,
-        func.count(ListenEvent.id).label('stream_count')
-    ).group_by(ListenEvent.artist).order_by(func.count(ListenEvent.id).desc()).limit(limit)
-    
-    results = query.all()
-    
-    # Convert to response format with ranking
-    response = []
-    for rank, (artist, stream_count) in enumerate(results, 1):
-        response.append(TopArtistResponse(
-            artist=artist,
-            stream_count=stream_count,
-            rank=rank
-        ))
-    
-    return response
-
-
-@router.get("/artists/rising", response_model=List[RisingArtistResponse])
-def get_rising_artists(
-    limit: int = Query(10, ge=1, le=100, description="Number of rising artists to return"),
-    db: Session = Depends(get_db)
-):
-    """
-    Get rising artists based on growth rate between time periods
-    Compares recent 7 days vs previous 7 days
-    """
-    from datetime import datetime, timedelta
-    
-    # Get current time and calculate time windows
-    now = datetime.utcnow()
-    recent_start = now - timedelta(days=7)
-    previous_start = now - timedelta(days=14)
-    
-    # Query recent period (last 7 days)
-    recent_query = db.query(
-        ListenEvent.artist,
-        func.count(ListenEvent.id).label('stream_count')
-    ).filter(
-        ListenEvent.timestamp >= recent_start
-    ).group_by(ListenEvent.artist)
-    
-    recent_results = recent_query.all()
-    recent_df = pd.DataFrame(recent_results, columns=['artist', 'current_streams'])
-    
-    # Query previous period (8-14 days ago)
-    previous_query = db.query(
-        ListenEvent.artist,
-        func.count(ListenEvent.id).label('stream_count')
-    ).filter(
-        ListenEvent.timestamp >= previous_start,
-        ListenEvent.timestamp < recent_start
-    ).group_by(ListenEvent.artist)
-    
-    previous_results = previous_query.all()
-    previous_df = pd.DataFrame(previous_results, columns=['artist', 'previous_streams'])
-    
-    # Merge dataframes
-    df = recent_df.merge(previous_df, on='artist', how='left')
-    df['previous_streams'] = df['previous_streams'].fillna(0)
-    
-    # Calculate growth rate (avoid division by zero)
-    df['growth_rate'] = df.apply(
-        lambda row: (
-            ((row['current_streams'] - row['previous_streams']) / row['previous_streams'] * 100)
-            if row['previous_streams'] > 0
-            else (100.0 if row['current_streams'] > 0 else 0.0)
-        ),
-        axis=1
+    # Find the MAX play_count per state (subquery)
+    subq = (
+        db.query(
+            SummaryArtistPopularityByGeo.state,
+            func.max(SummaryArtistPopularityByGeo.play_count).label("max_play_count")
+        )
+        .group_by(SummaryArtistPopularityByGeo.state)
+        .subquery()
     )
-    
-    # Sort by growth rate and limit
-    df = df.sort_values('growth_rate', ascending=False).head(limit)
-    
-    # Convert to response format
-    response = []
-    for _, row in df.iterrows():
-        response.append(RisingArtistResponse(
-            artist=row['artist'],
-            growth_rate=float(row['growth_rate']),
-            current_streams=int(row['current_streams']),
-            previous_streams=int(row['previous_streams'])
-        ))
-    
-    return response
+
+    # Join to main table to get the top artist per state
+    results = (
+        db.query(SummaryArtistPopularityByGeo)
+        .join(
+            subq,
+            and_(
+                SummaryArtistPopularityByGeo.state == subq.c.state,
+                SummaryArtistPopularityByGeo.play_count == subq.c.max_play_count
+            )
+        )
+        .all()
+    )
+
+    return [
+        ArtistPopularityByGeoResponse(
+            state=row.state,
+            artist=row.artist,
+            play_count=row.play_count,
+            unique_listeners=row.unique_listeners,
+            last_updated=row.last_updated
+        )
+        for row in results
+    ]
+
+
+@router.get("/artists/rising", response_model=List[UserEngagementByContentResponse])
+def get_rising_artists(
+    db: Session = Depends(get_db)
+):
+    query = db.query(SummaryUserEngagementByContent)
+    # Sort by repeat_plays descending as "rising" proxy
+    results = query.order_by(SummaryUserEngagementByContent.repeat_plays.desc()).all()
+    return [
+        UserEngagementByContentResponse(
+            artist=row.artist,
+            genre=row.genre,
+            avg_session_length_after_play=row.avg_session_length_after_play,
+            repeat_plays=row.repeat_plays,
+            unique_listeners=row.unique_listeners,
+            returning_user_pct=row.returning_user_pct,
+            last_updated=row.last_updated
+        )
+        for row in results
+    ]
+
+@router.get("/cities/growth", response_model=List[CityGrowthTrendsResponse])
+def get_city_growth(
+    state: Optional[str] = Query(None, description="Filter by state"),
+    db: Session = Depends(get_db)
+):
+    query = db.query(SummaryCityGrowthTrends)
+    if state:
+        query = query.filter(SummaryCityGrowthTrends.state == state)
+    return [
+        CityGrowthTrendsResponse(
+            city=row.city,
+            state=row.state,
+            date=row.date,
+            new_users=row.new_users,
+            percent_growth_wow=row.percent_growth_wow,
+            total_streaming_hours=row.total_streaming_hours
+        ) for row in query.all()
+    ]
+
+@router.get("/platforms/usage", response_model=List[PlatformUsageResponse])
+def get_platform_usage(
+    platform: Optional[str] = Query(None, description="Filter by platform"),
+    db: Session = Depends(get_db)
+):
+    query = db.query(SummaryPlatformUsage)
+    if platform:
+        query = query.filter(SummaryPlatformUsage.platform == platform)
+    return [
+        PlatformUsageResponse(
+            device_type=row.device_type,
+            region_name=row.region_name,
+            active_users=row.active_users,
+            play_count=row.play_count
+        ) for row in query.all()
+    ]
+
+@router.get("/dashboard/summary")
+def dashboard_summary(db: Session = Depends(get_db)):
+    # Total users from platform usage
+    total_users = db.query(func.sum(SummaryPlatformUsage.active_users)).scalar() or 0
+    total_plays = db.query(func.sum(SummaryPlatformUsage.play_count)).scalar() or 0
+
+    # Latest city with max growth
+    city_growth = (
+    db.query(SummaryCityGrowthTrends)
+    .filter(SummaryCityGrowthTrends.percent_growth_wow != None)
+    .order_by(
+        SummaryCityGrowthTrends.date.desc(),
+        SummaryCityGrowthTrends.percent_growth_wow.desc(),
+    )
+    .first()
+)
+    return DashboardSummaryResponse(
+        total_active_users=total_users,
+        total_play_count=total_plays,
+        top_growth_city=city_growth.city if city_growth else None,
+        top_growth_percent=city_growth.percent_growth_wow if city_growth else None,
+    )
+
+@router.get("/retention", response_model=List[RetentionCohortResponse])
+def get_retention_data(
+    cohort_month: Optional[str] = Query(None, description="Cohort month (YYYY-MM)"),
+    state: Optional[str] = Query(None, description="US state abbreviation (e.g., 'NY', 'TX')"),
+    db: Session = Depends(get_db)
+):
+    query = db.query(SummaryRetentionCohort)
+    if cohort_month:
+        query = query.filter(SummaryRetentionCohort.cohort_month == cohort_month)
+    if state:
+        query = query.filter(SummaryRetentionCohort.state == state)
+    return [
+        RetentionCohortResponse(
+            cohort_month=row.cohort_month,
+            period=row.period,
+            state=row.state,
+            retained_users=row.retained_users,
+            churned_users=row.churned_users,
+            upgrades=row.upgrades,
+            downgrades=row.downgrades,
+            last_updated=row.last_updated
+        ) for row in query.all()
+    ]

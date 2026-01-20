@@ -18,10 +18,10 @@ from datetime import datetime, timedelta
 
 
 # Database connection
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://sunflower_user:zipmusic@xo.zipcode.rocks:9088/sunflower",
-)
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not DATABASE_URL:
+    raise RuntimeError("DATABASE_URL is not set. Check your docker-compose.yml")
 
 # Create engine
 engine = create_engine(DATABASE_URL)
