@@ -7,7 +7,11 @@ load_dotenv()
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
+<<<<<<< HEAD
     "postgresql://sunflower_user:zipmusic@xo.zipcode.rocks:9088/sunflower"
+=======
+    "postgresql://sunflower_user:zipmusic@xo.zipcode.rocks:9088/sunflower",
+>>>>>>> alan
 )
 
 engine = create_engine(DATABASE_URL)

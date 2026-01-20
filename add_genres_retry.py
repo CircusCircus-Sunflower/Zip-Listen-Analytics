@@ -31,6 +31,7 @@ def get_engine():
 
 
 def retry_on_disconnect(func, max_retries=3):
+    """Retry a database operation if connection drops."""
     for attempt in range(max_retries):
         try:
             return func()
@@ -44,70 +45,49 @@ def retry_on_disconnect(func, max_retries=3):
                 raise e
 
 
-def get_artist_genre(artist_name, max_retries=5):
+def get_artist_genre(artist_name):
+    """Look up artist on MusicBrainz."""
     if artist_name in genre_cache:
         return genre_cache[artist_name]
 
-    search_url = "https://musicbrainz.org/ws/2/artist/"
-    params = {"query": artist_name, "fmt": "json", "limit": 1}
+    try:
+        search_url = "https://musicbrainz.org/ws/2/artist/"
+        params = {"query": artist_name, "fmt": "json", "limit": 1}
+        response = requests.get(search_url, params=params, headers=HEADERS, timeout=10)
 
-    for attempt in range(1, max_retries + 1):
-        try:
-            response = session.get(
-                search_url, params=params, headers=HEADERS, timeout=15
-            )
-
-            # Handle temporary errors / throttling
-            if response.status_code in (429, 502, 503, 504):
-                retry_after = response.headers.get("Retry-After")
-                sleep_s = float(retry_after) if retry_after else min(2**attempt, 30)
-                sleep_s += random.uniform(0, 0.5)
-                print(f"(HTTP {response.status_code}, retrying in {sleep_s:.1f}s)")
-                time.sleep(sleep_s)
-                continue
-
-            if not response.ok:
-                genre_cache[artist_name] = None
-                return None
-
-            data = response.json()
-            artists = data.get("artists") or []
-            if not artists:
-                genre_cache[artist_name] = None
-                return None
-
-            artist = artists[0]
-            tags = artist.get("tags", []) or []
-
-            if tags:
-                genre_tags = [t for t in tags if t.get("count", 0) > 0]
-                if genre_tags:
-                    genre_tags.sort(key=lambda x: x.get("count", 0), reverse=True)
-                    genre = genre_tags[0]["name"].title()
-                    genre_cache[artist_name] = genre
-                    return genre
-
+        if not response.ok:
             genre_cache[artist_name] = None
             return None
 
-        except RequestException as e:
-            # Connection reset / timeout / transient network hiccup
-            if attempt == max_retries:
-                print(f"  API Error (final): {e}")
-                genre_cache[artist_name] = None
-                return None
+        data = response.json()
 
-            sleep_s = min(2**attempt, 30) + random.uniform(0, 0.5)
-            print(
-                f"  API hiccup (attempt {attempt}/{max_retries}): {e} — retrying in {sleep_s:.1f}s"
-            )
-            time.sleep(sleep_s)
+        if not data.get("artists"):
+            genre_cache[artist_name] = None
+            return None
 
-    genre_cache[artist_name] = None
-    return None
+        artist = data["artists"][0]
+        tags = artist.get("tags", [])
+
+        if tags:
+            genre_tags = [t for t in tags if t.get("count", 0) > 0]
+            if genre_tags:
+                genre_tags.sort(key=lambda x: x.get("count", 0), reverse=True)
+                genre = genre_tags[0]["name"].title()
+                genre_cache[artist_name] = genre
+                return genre
+
+        genre_cache[artist_name] = None
+        return None
+
+    except Exception as e:
+        print(f"  API Error: {e}")
+        genre_cache[artist_name] = None
+        return None
 
 
 def update_artist_genre(engine, artist_name, genre):
+    """Update genre with retry logic."""
+
     def do_update():
         with engine.connect() as conn:
             conn.execute(
@@ -126,6 +106,7 @@ def main():
 
     engine = get_engine()
 
+    # Add genre column if needed
     def add_column():
         with engine.connect() as conn:
             conn.execute(
@@ -138,6 +119,7 @@ def main():
     retry_on_disconnect(add_column)
     print("✓ Genre column ready")
 
+    # Get artists without genres
     def get_artists():
         with engine.connect() as conn:
             result = conn.execute(
@@ -155,6 +137,7 @@ def main():
     print(f"\nFound {len(artists):,} artists without genres")
     print("This will take a while... (Ctrl+C to stop)\n")
 
+    # Process artists
     genres_found = 0
 
     for i, artist in enumerate(artists, 1):
@@ -164,6 +147,7 @@ def main():
 
         if genre:
             try:
+                # Refresh engine every 500 artists to prevent stale connections
                 if i % 500 == 0:
                     engine = get_engine()
                     print("\n  (Refreshed connection)")
@@ -173,12 +157,13 @@ def main():
                 genres_found += 1
             except Exception as e:
                 print(f"✗ DB Error: {e}")
-                engine = get_engine()
+                engine = get_engine()  # Reconnect
         else:
             print("✗ Not found")
 
         time.sleep(1.1)
 
+    # Summary
     print("\n" + "=" * 60)
     print(f"  DONE! Added genres to {genres_found} artists")
     print("=" * 60)
