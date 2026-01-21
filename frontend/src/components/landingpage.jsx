@@ -1,8 +1,55 @@
-import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 import './landingpage.css';
+import solLogo from '../assets/sol-logo.png';
 
 function LandingPage() {
-  const navigate = useNavigate();
+  const [messages, setMessages] = useState([]);
+  const [question, setQuestion] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const askQuestion = async () => {
+    if (!question.trim()) return;
+    
+    setLoading(true);
+    
+    // Add user message
+    const userMessage = { type: 'user', text: question };
+    setMessages(prev => [...prev, userMessage]);
+    
+    try {
+      const response = await fetch('http://localhost:8000/api/ollama/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question })
+      });
+      
+      const data = await response.json();
+      
+      // Add AI response
+      setMessages(prev => [...prev, {
+        type: 'assistant',
+        text: data.answer,
+        sql: data.sql,
+        data: data.raw_data
+      }]);
+      
+    } catch (error) {
+      setMessages(prev => [...prev, {
+        type: 'error',
+        text: 'Sorry, I encountered an error. Please try again.'
+      }]);
+    }
+    
+    setQuestion('');
+    setLoading(false);
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      askQuestion();
+    }
+  };
 
   return (
     <div className="landing-page">
@@ -25,18 +72,58 @@ function LandingPage() {
         </p>
 
         <div className="sol-logo-container">
-          <img src="/sol-logo.png" alt="Sol - Sunflower Analytics Mascot" className="sol-logo" />
+          <img src={solLogo} alt="Sol - Sunflower Analytics Mascot" className="sol-logo" />
         </div>
+
+        {/* Messages Area - Shows when there are messages */}
+        {messages.length > 0 && (
+          <div className="messages-area">
+            {messages.map((msg, idx) => (
+              <div key={idx} className={`message ${msg.type}`}>
+                {msg.type === 'user' && (
+                  <div className="message-bubble user-bubble">
+                    <strong>You:</strong> {msg.text}
+                  </div>
+                )}
+                
+                {msg.type === 'assistant' && (
+                  <div className="message-bubble assistant-bubble">
+                    <strong>Sol:</strong> {msg.text}
+                    {msg.sql && (
+                      <details className="sql-details">
+                        <summary>View SQL</summary>
+                        <pre><code>{msg.sql}</code></pre>
+                      </details>
+                    )}
+                  </div>
+                )}
+                
+                {msg.type === 'error' && (
+                  <div className="message-bubble error-bubble">
+                    {msg.text}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
 
         <div className="chat-input-container">
           <input 
             type="text" 
             placeholder="Hi there! I'm Sol... how can I assist you today?"
             className="landing-chat-input"
-            onFocus={() => navigate('/chat')}
+            value={question}
+            onChange={(e) => setQuestion(e.target.value)}
+            onKeyPress={handleKeyPress}
+            disabled={loading}
           />
-          <button className="send-btn-landing" onClick={() => navigate('/chat')}>
-            Send
+          <button 
+            className="send-btn-landing" 
+            onClick={askQuestion}
+            disabled={loading || !question.trim()}
+          >
+            {loading ? 'Thinking...' : 'Send'}
           </button>
         </div>
 
