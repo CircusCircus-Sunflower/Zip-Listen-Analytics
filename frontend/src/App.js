@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import axios from 'axios';
 import Plot from 'react-plotly.js';
 import ChatInterface from './components/ChatInterface';
+import LandingPage from './components/landingpage';
 import './App.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
@@ -151,33 +152,48 @@ function Dashboard() {
 
   if (loading) {
     return (
-      <>
+      <div className="App">
+        <nav className="main-nav">
+          <Link to="/" className="nav-link">🏠 Home</Link>
+          <Link to="/dashboard" className="nav-link">📊 Dashboard</Link>
+          <Link to="/chat" className="nav-link">💬 AI Chat</Link>
+        </nav>
         <header className="App-header">
-          <h1>Zip Listen Analytics</h1>
+          <h1>Sunflower Analytics</h1>
         </header>
         <div className="loading">Loading data...</div>
-      </>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <>
+      <div className="App">
+        <nav className="main-nav">
+          <Link to="/" className="nav-link">🏠 Home</Link>
+          <Link to="/dashboard" className="nav-link">📊 Dashboard</Link>
+          <Link to="/chat" className="nav-link">💬 AI Chat</Link>
+        </nav>
         <header className="App-header">
-          <h1>Zip Listen Analytics</h1>
+          <h1>Sunflower Analytics</h1>
         </header>
         <div className="error">
           <p>Error loading data: {error}</p>
           <button onClick={fetchData}>Retry</button>
         </div>
-      </>
+      </div>
     );
   }
 
   return (
-    <>
+    <div className="App">
+      <nav className="main-nav">
+        <Link to="/" className="nav-link">🏠 Home</Link>
+        <Link to="/dashboard" className="nav-link">📊 Dashboard</Link>
+        <Link to="/chat" className="nav-link">💬 AI Chat</Link>
+      </nav>
       <header className="App-header">
-        <h1>🎵 Zip Listen Analytics</h1>
+        <h1>🎵 Sunflower Analytics</h1>
         <p>Music Streaming Analytics Dashboard</p>
       </header>
       
@@ -228,10 +244,10 @@ function Dashboard() {
       </div>
 
       <footer className="App-footer">
-        <p>Powered by FastAPI, PostgreSQL, React, and Plotly</p>
+        <p>Powered by FastAPI, PostgreSQL, React, Plotly, and Ollama</p>
         <button onClick={fetchData} className="refresh-btn">🔄 Refresh Data</button>
       </footer>
-    </>
+    </div>
   );
 }
 
@@ -239,17 +255,20 @@ function Dashboard() {
 function App() {
   return (
     <Router>
-      <div className="App">
-        <nav className="main-nav">
-          <Link to="/" className="nav-link">📊 Dashboard</Link>
-          <Link to="/chat" className="nav-link">💬 AI Chat</Link>
-        </nav>
-
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/chat" element={<ChatInterface />} />
-        </Routes>
-      </div>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/chat" element={
+          <div className="App">
+            <nav className="main-nav">
+              <Link to="/" className="nav-link">🏠 Home</Link>
+              <Link to="/dashboard" className="nav-link">📊 Dashboard</Link>
+              <Link to="/chat" className="nav-link">💬 AI Chat</Link>
+            </nav>
+            <ChatInterface />
+          </div>
+        } />
+      </Routes>
     </Router>
   );
 }
