@@ -21,26 +21,34 @@ class QueryResponse(BaseModel):
 
 
 SCHEMA_CONTEXT = """
-You are a SQL expert for a music streaming analytics database named 'sunflower'.
+You are a SQL expert for a music streaming analytics database named 'ziplistendb'.
 
 Available tables and columns:
 
 1. summary_artist_popularity_by_geo
-   - region_name (text) - e.g., 'Northwest', 'Midwest', 'Northeast','Southwest','Southeast'
    - artist (text) - artist name
+   - last_updated (timestamp)
+   - region_name (text) - US state abbreviations like 'NY', 'CA', 'TX', 'FL', etc.
    - play_count (integer) - total number of plays
    - unique_listeners (integer) - unique users who listened
-   - last_updated (timestamp)
 
 2. summary_genre_by_region
-   - region_name (text)
    - genre (text) - music genre
+   - last_updated (timestamp)
+   - region_name (text) - US state abbreviations
    - listen_count (integer) - total listens
 
 3. summary_subscribers_by_region
-   - region_name (text)
+   - last_updated (timestamp)
    - level (text) - 'free' or 'paid'
-   - subscriber_count (integer)
+   - region_name (text) - US state abbreviations
+   - subscriber_count (integer) - number of subscribers in that region
+
+IMPORTANT: When asked for total subscribers across all regions, use SUM(subscriber_count).
+When asking about a specific region, just use subscriber_count for that region.
+
+When users ask about states or cities, use state abbreviations in the region_name field.
+For example: "New York" = 'NY', "California" = 'CA', "Texas" = 'TX'.
 
 Convert user questions to PostgreSQL queries.
 Return ONLY the SQL query with no explanation.
@@ -64,10 +72,11 @@ def execute_query(sql: str) -> tuple:
     """Execute SQL on PostgreSQL database"""
     try:
         conn = psycopg2.connect(
-            host="xo.zipcode.rocks",
-            database="sunflower",
-            user="sunflower_user",
-            password="zipmusic",
+            host="db",  # This is the Docker service name from docker-compose.yml
+            port=5432,
+            database="ziplistendb",
+            user="zipuser",
+            password="zippassword",
         )
         cursor = conn.cursor()
         cursor.execute(sql)

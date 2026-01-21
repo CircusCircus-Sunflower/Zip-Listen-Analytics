@@ -1,11 +1,14 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import axios from 'axios';
 import Plot from 'react-plotly.js';
+import ChatInterface from './components/ChatInterface';
 import './App.css';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
-function App() {
+// Dashboard Component (your existing code)
+function Dashboard() {
   const [genresData, setGenresData] = useState([]);
   const [subscribersData, setSubscribersData] = useState([]);
   const [topArtistsData, setTopArtistsData] = useState([]);
@@ -148,18 +151,18 @@ function App() {
 
   if (loading) {
     return (
-      <div className="App">
+      <>
         <header className="App-header">
           <h1>Zip Listen Analytics</h1>
         </header>
         <div className="loading">Loading data...</div>
-      </div>
+      </>
     );
   }
 
   if (error) {
     return (
-      <div className="App">
+      <>
         <header className="App-header">
           <h1>Zip Listen Analytics</h1>
         </header>
@@ -167,12 +170,12 @@ function App() {
           <p>Error loading data: {error}</p>
           <button onClick={fetchData}>Retry</button>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="App">
+    <>
       <header className="App-header">
         <h1>🎵 Zip Listen Analytics</h1>
         <p>Music Streaming Analytics Dashboard</p>
@@ -228,7 +231,26 @@ function App() {
         <p>Powered by FastAPI, PostgreSQL, React, and Plotly</p>
         <button onClick={fetchData} className="refresh-btn">🔄 Refresh Data</button>
       </footer>
-    </div>
+    </>
+  );
+}
+
+// Main App with Routing
+function App() {
+  return (
+    <Router>
+      <div className="App">
+        <nav className="main-nav">
+          <Link to="/" className="nav-link">📊 Dashboard</Link>
+          <Link to="/chat" className="nav-link">💬 AI Chat</Link>
+        </nav>
+
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/chat" element={<ChatInterface />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
