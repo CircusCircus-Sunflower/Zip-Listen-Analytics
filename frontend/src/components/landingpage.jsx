@@ -85,7 +85,7 @@ function LandingPage() {
                     <strong>You:</strong> {msg.text}
                   </div>
                 )}
-                
+
                 {msg.type === 'assistant' && (
                   <div className="message-bubble assistant-bubble">
                     <strong>Sol:</strong> {msg.text}
